@@ -18,6 +18,8 @@
     margin: 0 auto;
     background-color: #ffffff;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
   }
 
   /* --- MARCO DE LA FOTO Y ELEMENTOS SUPERPUESTOS --- */
@@ -102,8 +104,9 @@
     padding: 25px 20px 35px 20px;
     text-align: center;
     font-family: 'Montserrat', sans-serif;
-    background-color: #e4e6e6;
+    background-color: #e4e6e6; /* Línea para cambiar el color de fondo */
     border-top: 1px solid #eee;
+    position: relative;
   }
 
   .regalo-titulo {
@@ -120,6 +123,7 @@
     position: relative;
     margin-bottom: 10px;
     user-select: none;
+    z-index: 2;
   }
 
   .gift-svg {
@@ -156,6 +160,8 @@
     overflow: hidden;
     opacity: 0;
     transition: max-height 0.6s ease, opacity 0.6s ease, margin-top 0.4s ease;
+    position: relative;
+    z-index: 2;
   }
 
   .alias-info.visible {
@@ -200,6 +206,17 @@
     background: #d4af37;
     color: #fff;
   }
+
+  /* CANVAS DE CONFETI */
+  #canvasConfeti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
 </style>
 </head>
 <body>
@@ -236,7 +253,9 @@
   </div>
 
   <div class="regalo-seccion" id="seccionRegalo">
-    <div class="regalo-titulo">Si deseas hacerme un regalo, puedes colaborar con mi viaje:</div>
+    <canvas id="canvasConfeti"></canvas>
+    
+    <div class="regalo-titulo">¡Lo más importante es celebrar juntos!<br>Pero si querés hacerme un regalito, tocá la cajita para ver mi alias.</div>
     
     <div class="regalo-box-container" id="regaloBox">
       <svg class="gift-svg" viewBox="0 0 100 100">
@@ -258,7 +277,7 @@
     </div>
 
     <div class="alias-info" id="aliasInfo">
-      <div class="alias-texto">Este es mi alias:</div>
+      
       <div class="alias-codigo" id="aliasTexto">emma.miche.mp</div>
       <button class="btn-copiar" id="btnCopiarAlias">Copiar Alias</button>
     </div>
@@ -267,7 +286,7 @@
 </div>
 
 <script>
-  // Script del contador corregido
+  // Script del contador
   const targetDate = new Date("2026-12-05T21:00:00").getTime();
 
   function updateTimer() {
@@ -296,29 +315,103 @@
   updateTimer();
   setInterval(updateTimer, 1000);
 
-  // Script del regalo corregido
+  // Script del regalo
   const regaloBox = document.getElementById("regaloBox");
   const aliasInfo = document.getElementById("aliasInfo");
   const txtInstruccion = document.getElementById("txtInstruccion");
   const btnCopiar = document.getElementById("btnCopiarAlias");
+  let regaloAbierto = false;
 
   regaloBox.addEventListener("click", function() {
-    regaloBox.classList.add("abierto");
-    aliasInfo.classList.add("visible");
-    txtInstruccion.style.display = "none";
+    if (!regaloAbierto) {
+      regaloAbierto = true;
+      regaloBox.classList.add("abierto");
+      aliasInfo.classList.add("visible");
+      txtInstruccion.style.display = "none";
 
-    setTimeout(() => {
-      btnCopiar.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 250);
+      lanzarConfeti();
+
+      setTimeout(() => {
+        btnCopiar.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 250);
+    }
   });
 
   btnCopiar.addEventListener("click", function() {
     const alias = document.getElementById("aliasTexto").innerText;
     navigator.clipboard.writeText(alias).then(() => {
-      btnCopiar.innerText = "¡Copiado!";
+      btnCopiar.innerText = "¡Gracias!";
       setTimeout(() => { btnCopiar.innerText = "Copiar Alias"; }, 2000);
     });
   });
+
+  // EFECTO CONFETI
+  function lanzarConfeti() {
+    const canvas = document.getElementById("canvasConfeti");
+    const ctx = canvas.getContext("2d");
+    const seccion = document.getElementById("seccionRegalo");
+
+    canvas.width = seccion.clientWidth;
+    canvas.height = seccion.clientHeight;
+
+    const colores = ["#d4af37", "#f0d685", "#e6b800", "#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4"];
+    const particulas = [];
+    const cantidad = 60;
+
+    const boxRect = regaloBox.getBoundingClientRect();
+    const seccionRect = seccion.getBoundingClientRect();
+    const origenX = boxRect.left - seccionRect.left + boxRect.width / 2;
+    const origenY = boxRect.top - seccionRect.top + boxRect.height / 2;
+
+    for (let i = 0; i < cantidad; i++) {
+      const angulo = Math.random() * Math.PI * 2;
+      const velocidad = Math.random() * 8 + 3;
+      particulas.push({
+        x: origenX,
+        y: origenY,
+        vx: Math.cos(angulo) * velocidad,
+        vy: Math.sin(angulo) * velocidad - 3,
+        radio: Math.random() * 4 + 2,
+        color: colores[Math.floor(Math.random() * colores.length)],
+        gravedad: 0.18,
+        opacidad: 1,
+        rotacion: Math.random() * 360,
+        vRotacion: (Math.random() - 0.5) * 10
+      });
+    }
+
+    function animar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let quedanParticulas = false;
+
+      particulas.forEach(p => {
+        if (p.opacidad > 0) {
+          quedanParticulas = true;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravedad;
+          p.opacidad -= 0.012;
+          p.rotacion += p.vRotacion;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotacion * Math.PI) / 180);
+          ctx.globalAlpha = Math.max(0, p.opacidad);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.radio, -p.radio, p.radio * 2, p.radio * 1.5);
+          ctx.restore();
+        }
+      });
+
+      if (quedanParticulas) {
+        requestAnimationFrame(animar);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    animar();
+  }
 </script>
 </body>
 </html>
