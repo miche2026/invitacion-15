@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+  }
+
+  /* El contenedor mágico que hace que los textos fluyan con la imagen */
+  .tarjeta-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    container-type: inline-size; 
+  }
+
+  .imagen-fondo {
+    width: 100%;
+    display: block;
+  }
+
+  /* --- CONTADOR SUPERPUESTO --- */
+  .contador-overlay {
+    position: absolute;
+    /* Si el contador te queda más arriba o abajo, cambiá este 44% */
+    top: 52%; 
+    left: 0;
+    width: 100%;
+    height: 8%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2cqw;
+  }
+
+  .time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16cqw;
+  }
+
+  .num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 8.5cqw; /* El tamaño de la letra depende del ancho de la foto */
+    font-weight: 300;
+    color: #555;
+    line-height: 1;
+  }
+
+  .label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5cqw;
+    color: #777;
+    margin-top: 1cqw;
+    letter-spacing: 1px;
+  }
+
+  .dots {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 7cqw;
+    font-weight: 300;
+    color: #555;
+    margin-top: -3cqw;
+  }
+
+  /* --- BOTONES INVISIBLES CLICKABLES --- */
+  .btn-invisible {
+    position: absolute;
+    left: 20%; /* Centrado, dejando 20% de cada lado */
+    width: 60%;
+    cursor: pointer;
+    /* BORDE TEMPORAL: Esto es para que veas dónde están los botones y los acomodes. 
+       ¡Borrá esta línea cuando ya esté todo listo para que se vuelvan invisibles! */
+    border: 2px dashed red;
+  }
+
+  .btn-mapa {
+    /* Ajustá este porcentaje para subir o bajar el área clickable del mapa */
+    top: 73%; 
+    height: 4.5%;
+  }
+
+  .btn-wa {
+    /* Ajustá este porcentaje para el área de confirmación */
+    top: 91.5%; 
+    height: 4.5%;
+  }
+</style>
+</head>
+<body>
+
+<div class="tarjeta-container">
+  
+  <!-- 1. ACÁ PEGAS EL LINK DE LA FOTO (La que tiene la franja gris vacía) -->
+  <img src="img/inv_v.png" class="imagen-fondo">
+
+  <!-- 2. EL CONTADOR VIVO -->
+  <div class="contador-overlay">
+    <div class="time-unit">
+      <span class="num" id="days">00</span>
+      <span class="label">DIAS</span>
+    </div>
+    <span class="dots">:</span>
+    <div class="time-unit">
+      <span class="num" id="hours">00</span>
+      <span class="label">HORAS</span>
+    </div>
+    <span class="dots">:</span>
+    <div class="time-unit">
+      <span class="num" id="minutes">00</span>
+      <span class="label">MINUTOS</span>
+    </div>
+    <span class="dots">:</span>
+    <div class="time-unit">
+      <span class="num" id="seconds">00</span>
+      <span class="label">SEGUNDOS</span>
+    </div>
+  </div>
+
+  <!-- 3. LOS ENLACES REALES (Reemplazá los href con tu mapa y tu WhatsApp) -->
+  <a href="https://maps.app.goo.gl/tg8GaTZinUUgzUwo8" target="_blank" class="btn-invisible btn-mapa"></a>
+  <a href="https://wa.me/5493416542449?text=Hola,%20te%20confirmo%20mi%20presencia.%20Mi%20nombre%20es:%20" class="btn-invisible btn-wa"></a>
+
+</div>
+
+<!-- SCRIPT DEL CONTADOR -->
+<script>
+  const targetDate = new Date("Dec 5, 2026 21:00:00").getTime();
+
+  const timer = setInterval(function() {
+    const now = new Date().getTime();
+    const distance = targetDate - now;
+
+    if (distance < 0) {
+      clearInterval(timer);
+      return;
+    }
+
+    const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("days").innerText = d.toString().padStart(2, '0');
+    document.getElementById("hours").innerText = h.toString().padStart(2, '0');
+    document.getElementById("minutes").innerText = m.toString().padStart(2, '0');
+    document.getElementById("seconds").innerText = s.toString().padStart(2, '0');
+  }, 1000);
+</script>
+</body>
+</html>
