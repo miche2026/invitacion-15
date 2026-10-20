@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Montserrat:wght@200;300;400;500&display=swap');
 
   body {
     margin: 0;
@@ -104,7 +104,7 @@
     padding: 25px 20px 35px 20px;
     text-align: center;
     font-family: 'Montserrat', sans-serif;
-    background-color: #e4e6e6; /* Línea para cambiar el color de fondo */
+    background-color: #e4e6e6;
     border-top: 1px solid #eee;
     position: relative;
   }
@@ -155,6 +155,55 @@
     letter-spacing: 1px;
   }
 
+  /* TEXTO GRACIAS CURVO VÍA SVG (ESPACIADO PERFECTO) */
+  .gracias-svg {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 70px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 10;
+    overflow: visible;
+  }
+
+  .gracias-text {
+    font-family: 'Caveat', cursive;
+    font-size: 28px;
+    font-weight: 700;
+    fill: #007bff;
+    filter: drop-shadow(0px 0px 4px rgba(0, 123, 255, 0.5));
+  }
+
+  /* ANIMACIÓN SIMULTÁNEA CON EL CONFETI */
+  @keyframes inflarExplotarSimultaneo {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.5);
+      filter: blur(0px);
+    }
+    20% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(-50%) scale(1.4);
+      filter: blur(1px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) scale(2.4);
+      filter: blur(8px);
+    }
+  }
+
+  .gracias-svg.animar-estallido {
+    animation: inflarExplotarSimultaneo 1.5s ease-out forwards;
+  }
+
   .alias-info {
     max-height: 0;
     overflow: hidden;
@@ -168,12 +217,6 @@
     max-height: 200px;
     opacity: 1;
     margin-top: 15px;
-  }
-
-  .alias-texto {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 8px;
   }
 
   .alias-codigo {
@@ -273,11 +316,21 @@
           <circle cx="50" cy="35" r="5" fill="#ffffff" />
         </g>
       </svg>
+
+      <!-- TEXTO GRACIAS CURVO CON RUTA SVG (LETRAS PERFECTAMENTE DISTRIBUIDAS) -->
+      <svg class="gracias-svg" id="graciasSvg" viewBox="0 0 160 70">
+        <path id="curvePath" d="M 15 55 A 70 45 0 0 1 145 55" fill="transparent" />
+        <text class="gracias-text">
+          <textPath href="#curvePath" startOffset="50%" text-anchor="middle">
+            ¡Gracias!
+          </textPath>
+        </text>
+      </svg>
+
       <div class="instruccion-click" id="txtInstruccion">Toca para abrir</div>
     </div>
 
     <div class="alias-info" id="aliasInfo">
-      
       <div class="alias-codigo" id="aliasTexto">emma.miche.mp</div>
       <button class="btn-copiar" id="btnCopiarAlias">Copiar Alias</button>
     </div>
@@ -320,16 +373,23 @@
   const aliasInfo = document.getElementById("aliasInfo");
   const txtInstruccion = document.getElementById("txtInstruccion");
   const btnCopiar = document.getElementById("btnCopiarAlias");
+  const graciasSvg = document.getElementById("graciasSvg");
+
   let regaloAbierto = false;
 
   regaloBox.addEventListener("click", function() {
+    lanzarConfeti();
+
+    // Dispara la animación de ¡Gracias! Vía SVG
+    graciasSvg.classList.remove("animar-estallido");
+    void graciasSvg.offsetWidth;
+    graciasSvg.classList.add("animar-estallido");
+
     if (!regaloAbierto) {
       regaloAbierto = true;
       regaloBox.classList.add("abierto");
       aliasInfo.classList.add("visible");
       txtInstruccion.style.display = "none";
-
-      lanzarConfeti();
 
       setTimeout(() => {
         btnCopiar.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -340,7 +400,7 @@
   btnCopiar.addEventListener("click", function() {
     const alias = document.getElementById("aliasTexto").innerText;
     navigator.clipboard.writeText(alias).then(() => {
-      btnCopiar.innerText = "¡Gracias!";
+      btnCopiar.innerText = "¡Copiado!";
       setTimeout(() => { btnCopiar.innerText = "Copiar Alias"; }, 2000);
     });
   });
