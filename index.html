@@ -2,35 +2,40 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500&display=swap');
 
   body {
     margin: 0;
     padding: 0;
-    /* Le ponemos un fondo por si alguien lo abre en PC, para que los costados no queden blancos */
     background-color: #e4e4e4; 
   }
 
   .tarjeta-container {
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
+    background-color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  /* --- MARCO DE LA FOTO Y ELEMENTOS SUPERPUESTOS --- */
+  .foto-wrapper {
     position: relative;
     width: 100%;
-    /* En PC se limita a 500px para que no quede gigante, pero en celular va a tomar el 100% del ancho */
-    max-width: 500px; 
-    margin: 0 auto; /* Esto la centra en la compu */
-    container-type: inline-size; 
+    container-type: inline-size;
   }
 
   .imagen-fondo {
     width: 100%;
-    height: auto; /* Esto es clave: hace que la imagen mantenga su proporción y empuje la página hacia abajo */
+    height: auto;
     display: block;
   }
   
   /* --- CONTADOR SUPERPUESTO --- */
   .contador-overlay {
     position: absolute;
-    /* Si el contador te queda más arriba o abajo, cambiá este 44% */
     top: 42.5%; 
     left: 0;
     width: 100%;
@@ -39,6 +44,7 @@
     justify-content: center;
     align-items: center;
     gap: 2cqw;
+    pointer-events: none;
   }
 
   .time-unit {
@@ -50,7 +56,7 @@
 
   .num {
     font-family: 'Montserrat', sans-serif;
-    font-size: 8.5cqw; /* El tamaño de la letra depende del ancho de la foto */
+    font-size: 8.5cqw;
     font-weight: 300;
     color: #555;
     line-height: 1;
@@ -75,71 +81,204 @@
   /* --- BOTONES INVISIBLES CLICKABLES --- */
   .btn-invisible {
     position: absolute;
-    left: 21%; /* Centrado, dejando 20% de cada lado */
+    left: 21%;
     width: 58%;
     cursor: pointer;
+    z-index: 10;
   }
 
   .btn-mapa {
-    /* Ajustá este porcentaje para subir o bajar el área clickable del mapa */
     top: 73%; 
     height: 3.5%;
   }
 
   .btn-wa {
-    /* Ajustá este porcentaje para el área de confirmación */
     top: 88%; 
     height: 3.5%;
   }
+
+  /* --- SECCIÓN REGALO INTERACTIVO --- */
+  .regalo-seccion {
+    padding: 25px 20px 35px 20px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #e4e6e6;
+    border-top: 1px solid #eee;
+  }
+
+  .regalo-titulo {
+    font-size: 14px;
+    font-weight: 300;
+    color: #666;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .regalo-box-container {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 10px;
+    user-select: none;
+  }
+
+  .gift-svg {
+    width: 80px;
+    height: 80px;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+  }
+
+  .regalo-box-container:hover .gift-svg {
+    transform: scale(1.08);
+  }
+
+  .gift-lid-group {
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    transform-origin: center top;
+  }
+
+  .regalo-box-container.abierto .gift-lid-group {
+    transform: translateY(-20px) rotate(-12deg);
+    opacity: 0;
+  }
+
+  .instruccion-click {
+    font-size: 11px;
+    color: #999;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .alias-info {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.6s ease, opacity 0.6s ease, margin-top 0.4s ease;
+  }
+
+  .alias-info.visible {
+    max-height: 200px;
+    opacity: 1;
+    margin-top: 15px;
+  }
+
+  .alias-texto {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .alias-codigo {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    background: #eee;
+    padding: 8px 14px;
+    border-radius: 6px;
+    display: inline-block;
+    letter-spacing: 1px;
+    user-select: all;
+  }
+
+  .btn-copiar {
+    display: block;
+    margin: 12px auto 0 auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    color: #d4af37;
+    background: none;
+    border: 1px solid #d4af37;
+    padding: 6px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-copiar:active {
+    background: #d4af37;
+    color: #fff;
+  }
 </style>
 </head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <body>
 
 <div class="tarjeta-container">
   
-  <!-- 1. ACÁ PEGAS EL LINK DE LA FOTO (La que tiene la franja gris vacía) -->
-  <img src="img/inv-v.png" class="imagen-fondo">
+  <div class="foto-wrapper">
+    <img src="img/inv-v.png" class="imagen-fondo" alt="Invitación">
 
-  <!-- 2. EL CONTADOR VIVO -->
-  <div class="contador-overlay">
-    <div class="time-unit">
-      <span class="num" id="days">00</span>
-      <span class="label">DIAS</span>
+    <div class="contador-overlay">
+      <div class="time-unit">
+        <span class="num" id="days">00</span>
+        <span class="label">DIAS</span>
+      </div>
+      <span class="dots">:</span>
+      <div class="time-unit">
+        <span class="num" id="hours">00</span>
+        <span class="label">HORAS</span>
+      </div>
+      <span class="dots">:</span>
+      <div class="time-unit">
+        <span class="num" id="minutes">00</span>
+        <span class="label">MINUTOS</span>
+      </div>
+      <span class="dots">:</span>
+      <div class="time-unit">
+        <span class="num" id="seconds">00</span>
+        <span class="label">SEGUNDOS</span>
+      </div>
     </div>
-    <span class="dots">:</span>
-    <div class="time-unit">
-      <span class="num" id="hours">00</span>
-      <span class="label">HORAS</span>
+
+    <a href="https://maps.app.goo.gl/tg8GaTZinUUgzUwo8" target="_blank" class="btn-invisible btn-mapa"></a>
+    <a href="https://wa.me/5493416542449?text=Hola,%20te%20confirmo%20mi%20presencia.%20Mi%20nombre%20es:%20" class="btn-invisible btn-wa"></a>
+  </div>
+
+  <div class="regalo-seccion" id="seccionRegalo">
+    <div class="regalo-titulo">Si deseas hacerme un regalo, puedes colaborar con mi viaje:</div>
+    
+    <div class="regalo-box-container" id="regaloBox">
+      <svg class="gift-svg" viewBox="0 0 100 100">
+        <rect x="20" y="45" width="60" height="45" rx="4" fill="#d4af37" />
+        <rect x="44" y="45" width="12" height="45" fill="#f0d685" />
+        
+        <g class="gift-lid-group">
+          <rect x="15" y="36" width="70" height="12" rx="3" fill="#c5a028" />
+          <rect x="44" y="36" width="12" height="12" fill="#f0d685" />
+          
+          <path d="M 50 36 C 30 18, 20 32, 50 36 Z" fill="#ffffff" opacity="0.9" />
+          <path d="M 50 36 C 70 18, 80 32, 50 36 Z" fill="#ffffff" opacity="0.9" />
+          <path d="M 46 36 L 38 44 L 46 42 Z" fill="#ffffff" opacity="0.8" />
+          <path d="M 54 36 L 62 44 L 54 42 Z" fill="#ffffff" opacity="0.8" />
+          <circle cx="50" cy="35" r="5" fill="#ffffff" />
+        </g>
+      </svg>
+      <div class="instruccion-click" id="txtInstruccion">Toca para abrir</div>
     </div>
-    <span class="dots">:</span>
-    <div class="time-unit">
-      <span class="num" id="minutes">00</span>
-      <span class="label">MINUTOS</span>
-    </div>
-    <span class="dots">:</span>
-    <div class="time-unit">
-      <span class="num" id="seconds">00</span>
-      <span class="label">SEGUNDOS</span>
+
+    <div class="alias-info" id="aliasInfo">
+      <div class="alias-texto">Este es mi alias:</div>
+      <div class="alias-codigo" id="aliasTexto">aaaa.aaa</div>
+      <button class="btn-copiar" id="btnCopiarAlias">Copiar Alias</button>
     </div>
   </div>
 
-  <!-- 3. LOS ENLACES REALES (Reemplazá los href con tu mapa y tu WhatsApp) -->
-  <a href="https://maps.app.goo.gl/tg8GaTZinUUgzUwo8" target="_blank" class="btn-invisible btn-mapa"></a>
-  <a href="https://wa.me/5493416542449?text=Hola,%20te%20confirmo%20mi%20presencia.%20Mi%20nombre%20es:%20" class="btn-invisible btn-wa"></a>
-
 </div>
 
-<!-- SCRIPT DEL CONTADOR -->
 <script>
-  const targetDate = new Date("Dec 5, 2026 21:00:00").getTime();
+  // Script del contador corregido
+  const targetDate = new Date("2026-12-05T21:00:00").getTime();
 
-  const timer = setInterval(function() {
+  function updateTimer() {
     const now = new Date().getTime();
     const distance = targetDate - now;
 
     if (distance < 0) {
-      clearInterval(timer);
+      document.getElementById("days").innerText = "00";
+      document.getElementById("hours").innerText = "00";
+      document.getElementById("minutes").innerText = "00";
+      document.getElementById("seconds").innerText = "00";
       return;
     }
 
@@ -152,7 +291,34 @@
     document.getElementById("hours").innerText = h.toString().padStart(2, '0');
     document.getElementById("minutes").innerText = m.toString().padStart(2, '0');
     document.getElementById("seconds").innerText = s.toString().padStart(2, '0');
-  }, 1000);
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+
+  // Script del regalo corregido
+  const regaloBox = document.getElementById("regaloBox");
+  const aliasInfo = document.getElementById("aliasInfo");
+  const txtInstruccion = document.getElementById("txtInstruccion");
+  const btnCopiar = document.getElementById("btnCopiarAlias");
+
+  regaloBox.addEventListener("click", function() {
+    regaloBox.classList.add("abierto");
+    aliasInfo.classList.add("visible");
+    txtInstruccion.style.display = "none";
+
+    setTimeout(() => {
+      btnCopiar.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 250);
+  });
+
+  btnCopiar.addEventListener("click", function() {
+    const alias = document.getElementById("aliasTexto").innerText;
+    navigator.clipboard.writeText(alias).then(() => {
+      btnCopiar.innerText = "¡Copiado!";
+      setTimeout(() => { btnCopiar.innerText = "Copiar Alias"; }, 2000);
+    });
+  });
 </script>
 </body>
 </html>
